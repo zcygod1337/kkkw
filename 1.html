@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付订单</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0522 0%, #1e0a3e 50%, #0c0522 100%);
+            color: #e0d6ff;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(123, 31, 162, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(74, 20, 140, 0.2) 0%, transparent 25%);
+            z-index: -1;
+        }
+        
+        .tech-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(90, 24, 154, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(90, 24, 154, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 40px;
+            background: rgba(26, 10, 46, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(157, 78, 221, 0.4);
+            border: 1px solid rgba(123, 44, 191, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #5a189a, #9d4edd, #c77dff, #9d4edd, #5a189a);
+            background-size: 400%;
+            border-radius: 22px;
+            z-index: -1;
+            animation: glow-border 8s linear infinite;
+        }
+        
+        @keyframes glow-border {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 400% 0;
+            }
+        }
+        
+        .neon-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 
+                0 0 5px #9d4edd,
+                0 0 10px #9d4edd,
+                0 0 20px #7b2cbf;
+            position: relative;
+            display: inline-block;
+            animation: neon-pulse 3s infinite alternate;
+        }
+        
+        @keyframes neon-pulse {
+            0%, 100% {
+                text-shadow: 
+                    0 0 5px #9d4edd,
+                    0 0 10px #9d4edd,
+                    0 0 20px #7b2cbf;
+            }
+            50% {
+                text-shadow: 
+                    0 0 10px #c77dff,
+                    0 0 20px #9d4edd,
+                    0 0 30px #7b2cbf;
+            }
+        }
+        
+        .order-info {
+            background: rgba(58, 28, 113, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+            border: 1px solid rgba(123, 44, 191, 0.3);
+        }
+        
+        .order-info h3 {
+            font-size: 1.5rem;
+            color: #c77dff;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(123, 44, 191, 0.5);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #cbbbf5;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            color: #fff;
+            padding: 8px 15px;
+            background: rgba(90, 24, 154, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(123, 44, 191, 0.3);
+        }
+        
+        .qr-container {
+            background: linear-gradient(135deg, rgba(30, 10, 62, 0.6) 0%, rgba(26, 10, 46, 0.7) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 0 30px rgba(157, 78, 221, 0.3);
+            border: 1px solid rgba(123, 44, 191, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .qr-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at center, rgba(157, 78, 221, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        .qr-title {
+            font-size: 1.8rem;
+            color: #ff6bff;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(255, 107, 255, 0.4);
+        }
+        
+        .qr-code {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 30px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .qr-code::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid #c77dff;
+            border-radius: 18px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.7; transform: scale(1); }
+        }
+        
+        .qr-code img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
+        
+        .instructions {
+            background: rgba(90, 24, 154, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+            border: 1px solid rgba(123, 44, 191, 0.3);
+        }
+        
+        .instructions h3 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(123, 44, 191, 0.5);
+        }
+        
+        .instruction-list {
+            list-style-type: none;
+            padding: 0 15px;
+        }
+        
+        .instruction-list li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .instruction-list li::before {
+            content: '•';
+            color: #ff6bff;
+            font-size: 1.8rem;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+        
+        .payment-button {
+            width: 300px;
+            max-width: 100%;
+            background: linear-gradient(45deg, #7b2cbf, #5a189a);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px auto 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
+        }
+        
+        .payment-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .payment-button:hover {
+            background: linear-gradient(45deg, #9d4edd, #7b2cbf);
+            box-shadow: 0 0 30px rgba(157, 78, 221, 0.7);
+            transform: translateY(-3px);
+        }
+        
+        .payment-button:hover::before {
+            left: 100%;
+        }
+        
+        .payment-button:active {
+            transform: translateY(1px);
+        }
+        
+        .footer {
+            margin-top: 40px;
+            color: #cbbbf5;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .timer {
+            font-size: 1.1rem;
+            color: #ff6bff;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .neon-title {
+                font-size: 2.2rem;
+            }
+            
+            .qr-code {
+                width: 220px;
+                height: 220px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .neon-title {
+                font-size: 1.8rem;
+            }
+            
+            .qr-title {
+                font-size: 1.5rem;
+            }
+            
+            .qr-code {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .payment-button {
+                width: 100%;
+                padding: 15px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tech-grid"></div>
+    
+    <div class="container">
+        <h1 class="neon-title">支付订单</h1>
+        
+        <div class="order-info">
+            <h3>订单信息</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-hashtag"></i>
+                        订单编号
+                    </div>
+                    <div class="info-value">QUANT-2025-0828-7752</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-hourglass-half"></i>
+                        支付时限
+                    </div>
+                    <div class="info-value">30分钟</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="qr-container">
+            <h2 class="qr-title">扫码支付</h2>
+            <div class="qr-code">
+                <img src="qrcode.png" alt="支付二维码">
+            </div>
+            <p>请使用微信扫描二维码完成支付</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>支付注意事项</h3>
+            <ul class="instruction-list">
+                <li>请核对订单金额与商品信息无误后再进行支付</li>
+                <li>支付成功后系统将自动处理订单，请勿重复支付</li>
+                <li>二维码有效期为30分钟，超时请刷新页面获取新二维码</li>
+                <li>请支付时备注你要买的东西</li>
+            </ul>
+        </div>
+        
+        <button class="payment-button" id="payment-button">
+            <i class="fas fa-check-circle"></i>
+            我已付款
+        </button>
+        
+        <div class="timer">
+            <i class="fas fa-clock"></i> 剩余支付时间: <span id="countdown">29:45</span>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 量子科技 | 安全支付保障您的购物体验</p>
+            <p>支付过程全程加密，保障您的资金安全</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 倒计时功能
+            let timeLeft = 30 * 60; // 30分钟（以秒计）
+            const countdownElement = document.getElementById('countdown');
+            
+            function updateCountdown() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                countdownElement.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    countdownElement.textContent = "00:00";
+                    countdownElement.style.color = "#ff4757";
+                    alert("支付二维码已过期，请刷新页面重新获取！");
+                } else {
+                    timeLeft--;
+                }
+            }
+            
+            const timer = setInterval(updateCountdown, 1000);
+            updateCountdown();
+            
+            // 付款按钮功能
+            const paymentButton = document.getElementById('payment-button');
+            
+            paymentButton.addEventListener('click', function() {
+                // 添加点击动画
+                this.style.transform = 'scale(0.95)';
+                
+                // 模拟处理过程
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // 模拟支付成功
+                    this.innerHTML = '<i class="fas fa-check-circle"></i> 支付成功！';
+                    this.style.background = 'linear-gradient(45deg, #2ecc71, #1abc9c)';
+                    
+                    // 显示成功消息
+                    setTimeout(() => {
+                        alert("支付api验证失败！请检查是否已付款");
+                    }, 500);
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
